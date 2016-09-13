@@ -7,7 +7,7 @@ if(isset($_GET['logout'])) {
 ?>
 <html>
 	<head>
-		<script src="assets/jquery-2.1.4.min.js"></script>
+		<script src="assets/jquery-3.1.0.min.js"></script>
 		<link rel="stylesheet" href="assets/style.css" />
 	</head>
 	<body>

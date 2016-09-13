@@ -36,39 +36,49 @@ class Search {
 
 		$search_array = str_split($search_string);
 		$search_length = sizeof($search_array) - 1;
-		$search_table = $this->generateBadCharacterTable($search_string);
+		$search_table = $this->generateSearchTable($search_string);
 		$suffix_table = $this->generateSuffix($search_string);
-		print_r($suffix_table);die;
-		$pos = $search_length;
+		$pos = $search_length + 1;
 		$i = $search_length;
 		$c = 0;
-		$n = 0;
+		$j = 0;
+		$n = $search_length;
 		$l = '';
+
 		while(!feof($f)) {
-			fseek($f, $pos, 0);
+			fseek($f, $pos, SEEK_SET);
 			$c = fgetc($f);
-			echo $c .' ';
 			if(in_array($c, $search_array)) {
-				$i = $search_table[$c];
-				$l .= $c;
-				echo '- '. $c .' ';
-				$pos++;
+				if($c == $search_array[$n]) {
+					$l .= $c;
+					$pos--;
+					$j++;
+					$n--;
+				} else {
+					$i = $search_table[$c];
+					$l = '';
+					$pos += $search_table[$c] + $j;
+					$n = $search_length;
+					$j = 0;
+				}
 			} else {
-				$pos += $i;
+				$pos += ($search_length + 1 + $j);
 				$i = sizeof($search_array);
 				$l = '';
+				$j = 0;
+				$n = $search_length;
 			}
 			if(strlen($l) > 4) {
 				//echo $l .' ';
 			}
-			if(strcmp($l, $search_string) == 0) {
+			if(strcmp(strrev($l), $search_string) == 0) {
 				return true;
 			}
 
-			if($c == PHP_EOL) {
+			/*if($c == PHP_EOL) {
 				$pos++;
-			}
-			$n++;
+			}*/
+			//$n++;
 		}
 		return false;
 	}
@@ -142,6 +152,18 @@ class Search {
 		}
 
 		return $result;
+	}
+
+	private function generateSearchTable($search_string) {
+		$out = array();
+		$search_string_array = str_split($search_string);
+		$n = strlen($search_string) - 1;
+		for($i = 0; $i < sizeof($search_string_array) - 1; $i++) {
+			$out[$search_string_array[$i]] = $n;
+			$n--;
+		}
+		$out[$search_string_array[$i]] = strlen($search_string);
+		return $out;
 	}
 }
 ?>
