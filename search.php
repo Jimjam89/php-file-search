@@ -15,26 +15,18 @@ if($session != $test) {
     die;
 }
 if ($_POST['search'] && $_POST['dir']) {
-	$pwd = shell_exec('pwd');
 	$search_string = $_POST['search'];
 	$dir = $_POST['dir'];
-	exec('grep -rli --exclude "*.jpg" "'. $search_string .'" '. $dir, $results);
 
-	echo sizeof($results);
 	$search  = new Search();
-
+	$filters = array(
+		'binary' => 0, //TODO
+		'extension' => $_POST['extension'],
+		'name' => $_POST['name']
+	);
+	$search->setFilters($filters);
 	$search->grepSearch($dir, $search_string);
 
-	$c = 0;
-	foreach($search->getFiles() as $result) {
-		$c += sizeof($result['result']);
-	}
-
-	echo ' - '. sizeof($search->getFiles());
-
-	echo json_encode(array(
-		'custom' => $search->getFiles(),
-		'grep' => $results
-	));
+	echo json_encode($search->getFiles());
 }
 ?>

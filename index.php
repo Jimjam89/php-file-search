@@ -23,17 +23,24 @@ if(isset($_GET['logout'])) {
 		<form action="search.php" method="POST">
 			<label>Search</label>
 			<input type="text" name="search"></input>
-			<label>Directory</label>
-			<select name="dir">
-				<option value="<?php echo '.' ?>">/</option>
-				<?php
-					$dirs = glob('*');
-					foreach($dirs as $dir) {
-						if(is_dir($dir)) { ?>
-				<option value="<?php echo $dir ?>">/<?php echo $dir ?></option>
-				<?php } } ?>
-			</select>
 			<a id="submit">Search</a>
+			<a id="filters">Filters</a>
+			<div class="filter-block">
+				<label>Name</label>
+				<input type="text" name="name" />
+				<label>Extension</label>
+				<input type="text" name="extension" />
+				<label>Directory</label>
+				<select name="dir">
+					<option value=".">/</option>
+					<?php
+						$dirs = glob('*');
+						foreach($dirs as $dir) {
+							if(is_dir($dir)) { ?>
+					<option value="<?php echo $dir ?>">/<?php echo $dir ?></option>
+					<?php } } ?>
+				</select>
+			</div>
 		</form>
 		<div id="results"></div>
 		<script type="text/javascript">
@@ -46,20 +53,28 @@ if(isset($_GET['logout'])) {
 				success: function(result) {
 					html = '';
 					for(var i = 0; i < result.length; i++) {
-						html +='<div class="result">' + result[i]['file'] + '</div>';
+						html +='<div class="result">';
+						html += '<span>' + result[i]['file'] + '</span>';
+						html += '<div class="result-detail">';
+						console.log(result[i]['result'][0]);
+						for(var j = 0; j < result[i]['result'].length; j++) {
+							html += '<div class="line"<span class="line-number">' + result[i]['result'][j]['line_number'] + '</span>';
+							html += '<span class="content">' + result[i]['result'][j]['line'] + '</span></div>';
+						}
+						html += '</div>';
+						html += '</div>';
 					}
 					$('#results').html(html);
-					for(var i; i < result['grep'].length; i++) {
-						if(i < result['custom'].length) {
-							if(result['grep'][i] != result['custom'][i]['file']) {
-								console.log(result['grep'][i]);
-							}
-						} else {
-							console.log(result['grep'][i]);
-						}
-					}
 				}
 			});
+		});
+
+		$('#filters').click(function() {
+			$('.filter-block').slideToggle();
+		});
+
+		$(document).on('click', '.result > span', function() {
+			$(this).next('.result-detail').slideToggle();
 		});
 		</script>
 	<?php } ?>
