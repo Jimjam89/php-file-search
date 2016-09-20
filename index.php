@@ -71,6 +71,10 @@ if(isset($_GET['logout'])) {
 						$('#results').html('Loading...');
 					},
 					success: function(result) {
+						if(result['refresh']) {
+							location.reload()
+						}
+
 						html = '';
 						if(result.length > 0) {
 							for(var i = 0; i < result.length; i++) {
