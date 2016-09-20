@@ -34,11 +34,15 @@ if(isset($_GET['logout'])) {
 						<select name="dir">
 							<option value=".">/</option>
 							<?php
+								$pwd = getcwd();
+								chdir('../');
 								$dirs = glob('*');
 								foreach($dirs as $dir) {
 									if(is_dir($dir)) { ?>
 							<option value="<?php echo $dir ?>">/<?php echo $dir ?></option>
-							<?php } } ?>
+							<?php } }
+							chdir($pwd);
+							?>
 						</select>
 					</div>
 					<div class="form-element">

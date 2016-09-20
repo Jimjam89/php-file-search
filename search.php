@@ -17,6 +17,8 @@ if($session != $test) {
 if ($_POST['search'] && $_POST['dir']) {
 	$search_string = $_POST['search'];
 	$dir = $_POST['dir'];
+	$pwd = getcwd();
+	chdir('../');
 	$available_dirs = glob('*');
 	$available_dirs[] = '.';
 	if(in_array($dir, $available_dirs)) {
@@ -33,5 +35,6 @@ if ($_POST['search'] && $_POST['dir']) {
 	} else {
 		echo json_encode(array());
 	}
+	chdir($pwd);
 }
 ?>
