@@ -91,7 +91,7 @@ class Search {
 			if(preg_match('/'. preg_quote($search) .'/', $line)) {
 				$result[] = array(
 					'line_number' => $n,
-					'line' => $line
+					'line' => htmlspecialchars($line)
 				);
 			}
 			$n++;
@@ -121,7 +121,7 @@ class Search {
 				//TODO
 			}
 
-			if($this->filters['extension'] && pathinfo($file, PATHINFO_EXTENSION) == $this->filters['extension']) {
+			if($this->filters['extension'] && in_array(pathinfo($file, PATHINFO_EXTENSION),$this->filters['extension'])) {
 				return false;
 			}
 

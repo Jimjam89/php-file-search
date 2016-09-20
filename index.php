@@ -11,72 +11,98 @@ if(isset($_GET['logout'])) {
 		<link rel="stylesheet" href="assets/style.css" />
 	</head>
 	<body>
-		<h1>File Search</h1>
-	<?php if(!isset($_SESSION['session_id'])) { ?>
-		<form action="auth.php" method="POST">
-			<label>Password</label>
-			<input type="password" name="password"></input>
-			<input type="submit"></input>
-		</form>
-	<?php } else { ?>
-		<a href="index.php?logout=1">Logout</a>
-		<form action="search.php" method="POST">
-			<label>Search</label>
-			<input type="text" name="search"></input>
-			<a id="submit">Search</a>
-			<a id="filters">Filters</a>
-			<div class="filter-block">
-				<label>Name</label>
-				<input type="text" name="name" />
-				<label>Extension</label>
-				<input type="text" name="extension" />
-				<label>Directory</label>
-				<select name="dir">
-					<option value=".">/</option>
-					<?php
-						$dirs = glob('*');
-						foreach($dirs as $dir) {
-							if(is_dir($dir)) { ?>
-					<option value="<?php echo $dir ?>">/<?php echo $dir ?></option>
-					<?php } } ?>
-				</select>
-			</div>
-		</form>
-		<div id="results"></div>
-		<script type="text/javascript">
-		$('#submit').click(function() {
-			$.ajax({
-				url: 'search.php',
-				type:'post',
-				dataType:'json',
-				data: $('form').serialize(),
-				success: function(result) {
-					html = '';
-					for(var i = 0; i < result.length; i++) {
-						html +='<div class="result">';
-						html += '<span>' + result[i]['file'] + '</span>';
-						html += '<div class="result-detail">';
-						console.log(result[i]['result'][0]);
-						for(var j = 0; j < result[i]['result'].length; j++) {
-							html += '<div class="line"<span class="line-number">' + result[i]['result'][j]['line_number'] + '</span>';
-							html += '<span class="content">' + result[i]['result'][j]['line'] + '</span></div>';
+		<header>
+			<h1>File Search</h1>
+		</header>
+		<div id="content">
+		<?php if(!isset($_SESSION['session_id'])) { ?>
+			<form action="auth.php" method="POST">
+				<label>Password</label>
+				<input type="password" name="password"></input>
+				<input type="submit"></input>
+			</form>
+		<?php } else { ?>
+			<a href="index.php?logout=1">Logout</a>
+			<form action="search.php" method="POST">
+				<div class="row">
+					<div class="form-element">
+						<label>Search</label>
+						<input type="text" name="search"></input>
+					</div>
+					<div class="form-element">
+						<label>Directory</label>
+						<select name="dir">
+							<option value=".">/</option>
+							<?php
+								$dirs = glob('*');
+								foreach($dirs as $dir) {
+									if(is_dir($dir)) { ?>
+							<option value="<?php echo $dir ?>">/<?php echo $dir ?></option>
+							<?php } } ?>
+						</select>
+					</div>
+					<div class="form-element">
+						<a id="submit">Search</a>
+					</div>
+					<div class="form-element">
+						<a id="filters">Exclusions</a>
+					</div>
+					<div class="filter-block">
+						<div class="form-element">
+							<label>Name (accepts regex)</label>
+							<input type="text" name="name" />
+						</div>
+						<div class="form-element">
+							<label>Extension (e.g. jpg,txt,doc)</label>
+							<input type="text" name="extension" />
+						</div>
+					</div>
+				</div>
+			</form>
+			<div id="results"></div>
+			<script type="text/javascript">
+			$('#submit').click(function() {
+				$.ajax({
+					url: 'search.php',
+					type:'post',
+					dataType:'json',
+					data: $('form').serialize(),
+					beforeSend:function() {
+						$('#results').html('Loading...');
+					},
+					success: function(result) {
+						html = '';
+						if(result.length > 0) {
+							for(var i = 0; i < result.length; i++) {
+								html +='<div class="result">';
+								html += '<div>' + result[i]['file'] + '</div>';
+								html += '<table class="result-detail">';
+								html += '<thead><tr><td>Line</td><td>Content</td></tr></thead><tbody>';
+								for(var j = 0; j < result[i]['result'].length; j++) {
+									html += '<tr><td>' + result[i]['result'][j]['line_number'] + '</td>';
+									html += '<td>' + result[i]['result'][j]['line'] + '</td></tr>';
+								}
+								html += '</tbody></table>';
+								html += '</div>';
+							}
+						} else {
+							html = 'No Results';
 						}
-						html += '</div>';
-						html += '</div>';
+						$('#results').html(html);
 					}
-					$('#results').html(html);
-				}
+				});
 			});
-		});
 
-		$('#filters').click(function() {
-			$('.filter-block').slideToggle();
-		});
+			$('#filters').click(function() {
+				$('.filter-block input').val('');
+				$('.filter-block').toggle();
+			});
 
-		$(document).on('click', '.result > span', function() {
-			$(this).next('.result-detail').slideToggle();
-		});
-		</script>
-	<?php } ?>
+			$(document).on('click', '.result > div', function() {
+				$(this).next('.result-detail').toggle();
+			});
+			</script>
+		<?php } ?>
+		</div>
 	</body>
 </html>
