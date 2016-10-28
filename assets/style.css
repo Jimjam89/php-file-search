@@ -68,6 +68,10 @@ form a:hover {
 	display:none;
 }
 
+#count {
+	margin:0 0 15px;
+}
+
 .result {
 	padding:10px 30px;
 	border:1px solid #1d7fd4;

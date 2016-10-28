@@ -74,13 +74,15 @@ if(isset($_GET['logout'])) {
 					beforeSend:function() {
 						$('#results').html('Loading...');
 					},
-					success: function(result) {
-						if(result['refresh']) {
+					success: function(results) {
+						if(results['refresh']) {
 							location.reload()
 						}
 
 						html = '';
-						if(result.length > 0) {
+						if(results['results']) {
+							var result = results['results'];
+							html += '<div id="count">' + results['count'] + ' results</div>';
 							for(var i = 0; i < result.length; i++) {
 								html +='<div class="result">';
 								html += '<div>' + result[i]['file'] + '</div>';

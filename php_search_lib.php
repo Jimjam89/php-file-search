@@ -3,12 +3,29 @@
 class Search {
 
 	private $files;
-
 	private $filters;
+	private $count;
+	private $search_string;
+	private $search_string_array;
+	private $search_string_length;
+	private $search_table;
+
 
 	public function __construct() {
 		$this->files = array();
 		$this->filters =  array();
+		$this->count = 0;
+	}
+
+	public function setSearch($string) {
+		$this->search_string = $string;
+		$this->search_string_array = str_split($string);
+		$this->search_string_length = strlen($string);
+		$this->search_table = $this->generateSearchTable();
+	}
+
+	public function getCount() {
+		return $this->count;
 	}
 
 	public function getFiles() {
@@ -19,76 +36,75 @@ class Search {
 		$this->filters = $filters;
 	}
 
-	public function grepSearch($dir, $search) {
+	public function grepSearch($dir) {
 	    $items = scandir($dir);
-	    //$files = array();
+		$n_files = sizeof($items);
+
 	    foreach($items as $item) {
-	        if($item != '.' && $item != '..' && $item != '.DS_Store') {
+	        if($item !== '.' && $item !== '..' && $item !== '.DS_Store') {
 	            if(is_file($dir .'/'. $item) && $this->filterFile($dir .'/'. $item)) {
-					if($this->inFile($dir .'/'. $item, $search)) {
+					if($this->inFile($dir .'/'. $item)) {
 						$this->files[] = array(
 							'file' => $dir .'/'. $item,
-							'result' => $this->searchFile($dir .'/'. $item, $search)
+							'result' => $this->searchFile($dir .'/'. $item)
 						);
 					}
 	            } else if(is_dir($dir .'/'. $item)) {
-					$this->grepSearch($dir .'/'. $item, $search);
+					$this->grepSearch($dir .'/'. $item);
 	            }
 	        }
 	    }
 	}
 
-	private function inFile($file, $search_string) {
+	private function inFile($file) {
 		$f = fopen($file, 'r');
 
-		$search_array = str_split($search_string);
-		$search_length = sizeof($search_array) - 1;
-		$search_table = $this->generateSearchTable($search_string);
-		$pos = $search_length + 1;
-		$i = $search_length;
+		$pos = $this->search_string_length;
+		$i = $this->search_string_length - 1;
 		$c = 0;
 		$j = 0;
-		$n = $search_length;
+		$n = $i;
 		$l = '';
 
 		while(!feof($f)) {
 			fseek($f, $pos, SEEK_SET);
 			$c = fgetc($f);
-			if(in_array($c, $search_array)) {
-				if($c == $search_array[$n]) {
+			if(in_array($c, $this->search_string_array)) {
+				if($c === $this->search_string_array[$n]) {
 					$l .= $c;
 					$pos--;
 					$j++;
 					$n--;
 				} else {
-					$i = $search_table[$c];
+					$i = $this->search_table[$c];
 					$l = '';
-					$pos += $search_table[$c] + $j;
-					$n = $search_length;
+					$pos += $this->search_table[$c] + $j;
+					$n = $this->search_string_length - 1;
 					$j = 0;
 				}
 			} else {
-				$pos += ($search_length + 1 + $j);
-				$i = sizeof($search_array);
+				$pos += ($this->search_string_length + $j);
+				$i = sizeof($this->search_string_array);
 				$l = '';
 				$j = 0;
-				$n = $search_length;
+				$n = $this->search_string_length - 1;
 			}
-			if(strcmp(strrev($l), $search_string) == 0) {
+			if(strlen($l) === $this->search_string_length) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	private function searchFile($file, $search) {
+	private function searchFile($file) {
 		$result = array();
 		$n = 1;
 
 		$f = fopen($file, 'r');
 
 		while($line = fgets($f)) {
-			if(preg_match('/'. preg_quote($search) .'/', $line)) {
+			if(strpos($line, $this->search_string) !== false) {
+				$this->count += 1;
 				$result[] = array(
 					'line_number' => $n,
 					'line' => htmlspecialchars($line)
@@ -100,15 +116,14 @@ class Search {
 		return $result;
 	}
 
-	private function generateSearchTable($search_string) {
+	private function generateSearchTable() {
 		$out = array();
-		$search_string_array = str_split($search_string);
-		$n = strlen($search_string) - 1;
-		for($i = 0; $i < sizeof($search_string_array) - 1; $i++) {
-			$out[$search_string_array[$i]] = $n;
+		$n = $max = $this->search_string_length - 1;
+		for($i = 0; $i < $max; $i++) {
+			$out[$this->search_string_array[$i]] = $n;
 			$n--;
 		}
-		$out[$search_string_array[$i]] = strlen($search_string);
+		$out[$this->search_string_array[$i]] = $this->search_string_length;
 		return $out;
 	}
 
