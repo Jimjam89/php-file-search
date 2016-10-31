@@ -1,7 +1,7 @@
 <?php
 require 'php_search_lib.php';
 
-$search_string = 'pplications';
+$search_string = 'session';
 $dir = '.';
 
 $search  = new Search();

@@ -53,7 +53,7 @@ if ($_POST['search'] && $_POST['dir']) {
 			}
 
 			$query .= ' "'. $search_string .'" '. $dir;
-			
+
 			exec($query, $results);
 			$tmp = array();
 			$files = array();

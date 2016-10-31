@@ -3,7 +3,7 @@ session_start();
 include('config.php');
 $pass = $_POST['password'];
 
-if($pass == PASS) {
+if(strlen(PASS) > 0 && $pass == PASS) {
     $_SESSION['session_id'] = md5($pass);
 }
 
