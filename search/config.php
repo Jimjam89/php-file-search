@@ -1,3 +1,3 @@
 <?php
-define('PASS', 'test');
+define('PASS', '');
 ?>
