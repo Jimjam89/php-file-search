@@ -1,5 +1,5 @@
 <?php
-require 'php_search_lib.php';
+require 'search/lib/php_search_lib.php';
 
 $search_string = 'session';
 $dir = '.';

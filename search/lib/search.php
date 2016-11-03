@@ -1,8 +1,9 @@
 <?php
 session_start();
 ini_set('display_errors', '1');
-require('config.php');
+require('../config.php');
 require('php_search_lib.php');
+header('Content-Type: application/json');
 if(!isset($_SESSION['session_id'])) {
     echo json_encode(array('refresh' => true));
     die;
@@ -18,7 +19,7 @@ if ($_POST['search'] && $_POST['dir']) {
 	$search_string = $_POST['search'];
 	$dir = $_POST['dir'];
 	$pwd = getcwd();
-	chdir('../');
+	chdir('../../');
 	$available_dirs = glob('*');
 	$available_dirs[] = '.';
 	if(in_array($dir, $available_dirs)) {

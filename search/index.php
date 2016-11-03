@@ -7,7 +7,7 @@ if(isset($_GET['logout'])) {
 ?>
 <html>
 	<head>
-		<script src="assets/jquery-3.1.0.min.js"></script>
+		<title>PHP File Search</title>
 		<link rel="stylesheet" href="assets/style.css" />
 	</head>
 	<body>
@@ -16,7 +16,7 @@ if(isset($_GET['logout'])) {
 		</header>
 		<div id="content">
 		<?php if(!isset($_SESSION['session_id'])) { ?>
-			<form action="auth.php" method="POST">
+			<form action="lib/auth.php" method="POST">
 				<label>Password</label>
 				<input type="password" name="password"></input>
 				<input type="submit"></input>
@@ -65,27 +65,31 @@ if(isset($_GET['logout'])) {
 			</form>
 			<div id="results"></div>
 			<script type="text/javascript">
-			$('#submit').click(function() {
-				$.ajax({
-					url: 'search.php',
-					type:'post',
-					dataType:'json',
-					data: $('form').serialize(),
-					beforeSend:function() {
-						$('#results').html('Loading...');
-					},
-					success: function(results) {
+			document.getElementById('submit').onclick = function() {
+
+				var form = document.querySelector('#content form');
+				var form_data = new FormData(form);
+				var results_div = document.getElementById('results');
+
+				var xhr = new XMLHttpRequest();
+				xhr.open('POST', 'lib/search.php');
+				results_div.innerHTML = 'Loading...';
+
+				xhr.onreadystatechange = function() {
+					if (xhr.readyState==4 && xhr.status==200) {
+						var results = JSON.parse(xhr.responseText);
+
 						if(results['refresh']) {
 							location.reload()
 						}
 
-						html = '';
+						var html = '';
 						if(results['results']) {
 							var result = results['results'];
 							html += '<div id="count">' + results['count'] + ' results</div>';
 							for(var i = 0; i < result.length; i++) {
 								html +='<div class="result">';
-								html += '<div>' + result[i]['file'] + '</div>';
+								html += '<div class="result-title">' + result[i]['file'] + '</div>';
 								html += '<table class="result-detail">';
 								html += '<thead><tr><td>Line</td><td>Content</td></tr></thead><tbody>';
 								for(var j = 0; j < result[i]['result'].length; j++) {
@@ -98,19 +102,39 @@ if(isset($_GET['logout'])) {
 						} else {
 							html = 'No Results';
 						}
-						$('#results').html(html);
+						results_div.innerHTML = html;
 					}
-				});
-			});
+				}
+				xhr.send(form_data);
+			}
 
-			$('#filters').click(function() {
-				$('.filter-block input').val('');
-				$('.filter-block').toggle();
-			});
+			document.getElementById('filters').onclick = function() {
+				document.getElementsByName('name')[0].value = '';
+				document.getElementsByName('extension')[0].value = '';
 
-			$(document).on('click', '.result > div', function() {
-				$(this).next('.result-detail').toggle();
-			});
+				var filter_block = document.getElementsByClassName('filter-block')[0];
+
+				elementToggle(filter_block);
+			}
+
+			document.addEventListener('click', function(event) {
+				var element = event.target;
+				if(element.classList.contains('result-title')) {
+					var table = element.nextSibling;
+
+					elementToggle(table);
+				}
+			})
+
+			var elementToggle = function(element) {
+				var current_state = element.offsetParent;
+
+				if(current_state === null) {
+					element.style.display = 'block';
+				} else {
+					element.style.display = 'none';
+				}
+			}
 			</script>
 		<?php } ?>
 		</div>
