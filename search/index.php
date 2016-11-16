@@ -1,4 +1,5 @@
 <?php
+ini_set('display_errors','1');
 session_start();
 if(isset($_GET['logout'])) {
 	unset($_SESSION['session_id']);
@@ -31,19 +32,53 @@ if(isset($_GET['logout'])) {
 					</div>
 					<div class="form-element">
 						<label>Directory</label>
-						<select name="dir">
-							<option value=".">/</option>
-							<?php
-								$pwd = getcwd();
+						<?php
+							function buildTree($dir) {
+								chdir($dir);
+								$dir_list = glob('*');
+								$out = array();
+
+								foreach($dir_list as $element) {
+									if(is_dir($element)) {
+										$out[$element] = buildTree($element);
+									}
+								}
 								chdir('../');
-								$dirs = glob('*');
-								foreach($dirs as $dir) {
-									if(is_dir($dir)) { ?>
-							<option value="<?php echo $dir ?>">/<?php echo $dir ?></option>
-							<?php } }
+								return $out;
+							}
+
+							function printList($dir, $parent) {
+								echo '<ul>';
+								foreach($dir as $key => $e) {
+
+									echo '<li>';
+									if(sizeof($e)) {
+										echo '<span class="angle-down">&#10148;</span>';
+										echo '<span data-val="'. $parent .'/'. $key .'" class="name">'. $key .'</span>';
+										echo printList($e, $parent .'/'. $key);
+									} else {
+										echo '<span data-val="'. $parent .'/'. $key .'" class="name">'. $key .'</span>';;
+									}
+									echo '</li>';
+								}
+								echo '</ul>';
+							}
+							$pwd = getcwd();
+							chdir('../');
+							$dir_tree = buildTree('.');
 							chdir($pwd);
+							//print_r($dir_tree);
+						?>
+						<div id="directory">
+							<span id="selected">.</span>
+							<span class="angle-down">&#10148;</span>
+						</div>
+						<input type="hidden" name="dir" value="." />
+						<div id="dir-list">
+							<?php
+							printList($dir_tree, '.');
 							?>
-						</select>
+						</div>
 					</div>
 					<div class="form-element">
 						<a id="submit">Search</a>
@@ -65,6 +100,50 @@ if(isset($_GET['logout'])) {
 			</form>
 			<div id="results"></div>
 			<script type="text/javascript">
+			var dir_arrows = document.querySelectorAll('#dir-list .angle-down');
+			var dirs = document.querySelectorAll('#dir-list .name');
+
+			for(n = 0; n < dir_arrows.length; n++) {
+				dir_arrows[n].addEventListener('click', function(e) {
+					var sub_list = this.nextSibling.nextSibling;
+
+					var current_state = sub_list.style.display;
+					if(current_state == 'block') {
+						sub_list.style.display = 'none';
+						this.style.transform = 'rotate(0deg)';
+					} else {
+						sub_list.style.display = 'block';
+						this.style.transform = 'rotate(90deg)';
+					}
+				})
+			}
+
+			for(n = 0; n < dirs.length; n++) {
+				dirs[n].addEventListener('click', function(e) {
+					var value = this.dataset.val;
+					var text = this.innerHTML;
+
+					document.getElementById('selected').innerHTML = text;
+					document.querySelector('input[name=dir]').value = value;
+
+					document.getElementById('dir-list').style.display = 'none';
+					document.querySelector('#directory .angle-down').style.transform = 'rotate(90deg)';
+				})
+			}
+
+			document.getElementById('directory').onclick = function() {
+				var sub_list = document.getElementById('dir-list');
+				var angle = document.querySelector('#directory .angle-down');
+				var current_state = sub_list.style.display;
+				if(current_state == 'block') {
+					sub_list.style.display = 'none';
+					angle.style.transform = 'rotate(90deg)';
+				} else {
+					sub_list.style.display = 'block';
+					angle.style.transform = 'rotate(-90deg)';
+				}
+			};
+
 			document.getElementById('submit').onclick = function() {
 
 				var form = document.querySelector('#content form');

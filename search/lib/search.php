@@ -17,12 +17,12 @@ if($session != $test) {
 }
 if ($_POST['search'] && $_POST['dir']) {
 	$search_string = $_POST['search'];
-	$dir = $_POST['dir'];
+	$dir = str_replace('../', '', $_POST['dir']);
 	$pwd = getcwd();
 	chdir('../../');
 	$available_dirs = glob('*');
 	$available_dirs[] = '.';
-	if(in_array($dir, $available_dirs)) {
+	if(is_dir($dir)) {
 		if(!empty($_POST['extension']) || !empty($_POST['name'])) {
 			$filters = array(
 				'binary' => 0, //TODO
@@ -62,7 +62,7 @@ if ($_POST['search'] && $_POST['dir']) {
 				$result_array = explode(':', $result);
 				$tmp[$result_array[0]][] = array(
 					'line_number' => $result_array[1],
-					'line' => $result_array[2]
+					'line' => htmlspecialchars($result_array[2])
 				);
 			}
 

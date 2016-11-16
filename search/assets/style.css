@@ -42,7 +42,7 @@ form a {
 	border:1px solid #1d7fd4;
 	color:#1d7fd4;
 	display:block;
-	margin:20px 10px 0;
+	margin:31px 10px 0;
 	text-align:center;
 	cursor:pointer;
 }
@@ -99,4 +99,69 @@ thead {
 td {
 	border:1px solid #1d7fd4;
 	padding:5px;
+}
+
+#selected {
+
+}
+
+#directory {
+	padding:3px 5px 4px;
+	border:1px solid;
+	width:150px;
+
+}
+
+#directory > .angle-down {
+	float:right;
+	transform:rotate(90deg);
+}
+
+#dir-list {
+	padding:10px;
+	border-bottom:1px solid;
+	border-left:1px solid;
+	border-right:1px solid;
+	overflow-y:scroll;
+	max-height:150px;
+	display:none;
+	width:140px;
+	position:absolute;
+	background-color:#FFF;
+}
+
+#dir-list ul {
+	list-style:none;
+	padding-left:10px;
+	margin:0;
+}
+
+#dir-list ul ul {
+	display:none;
+}
+
+#dir-list li {
+	cursor:pointer;
+}
+
+#dir-list li .name {
+	width:100%;
+	display:block;
+}
+
+#dir-list li .name:hover {
+	background-color:#1d7fd4;
+	color:#FFF;
+}
+
+.angle-down {
+	float:left;
+	margin-left:-15px;
+	font-size:10px;
+	line-height:18px;
+}
+
+input {
+	height:27px;
+	border:1px solid #000;
 }
