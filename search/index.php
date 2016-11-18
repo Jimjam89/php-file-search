@@ -48,20 +48,20 @@ if(isset($_GET['logout'])) {
 							}
 
 							function printList($dir, $parent) {
-								echo '<ul>';
 								foreach($dir as $key => $e) {
 
 									echo '<li>';
 									if(sizeof($e)) {
 										echo '<span class="angle-down">&#10148;</span>';
 										echo '<span data-val="'. $parent .'/'. $key .'" class="name">'. $key .'</span>';
+										echo '<ul>';
 										echo printList($e, $parent .'/'. $key);
+										echo '</ul>';
 									} else {
 										echo '<span data-val="'. $parent .'/'. $key .'" class="name">'. $key .'</span>';;
 									}
 									echo '</li>';
 								}
-								echo '</ul>';
 							}
 							$pwd = getcwd();
 							chdir('../');
@@ -75,9 +75,12 @@ if(isset($_GET['logout'])) {
 						</div>
 						<input type="hidden" name="dir" value="." />
 						<div id="dir-list">
-							<?php
-							printList($dir_tree, '.');
-							?>
+							<ul>
+								<li><span class="name" data-val=".">.</span></li>
+								<?php
+								printList($dir_tree, '.');
+								?>
+							</ul>
 						</div>
 					</div>
 					<div class="form-element">
@@ -100,46 +103,41 @@ if(isset($_GET['logout'])) {
 			</form>
 			<div id="results"></div>
 			<script type="text/javascript">
-			var dir_arrows = document.querySelectorAll('#dir-list .angle-down');
-			var dirs = document.querySelectorAll('#dir-list .name');
+			var dir_list = document.getElementById('dir-list');
+			var angle = document.querySelector('#directory .angle-down');
+			document.getElementById('dir-list').addEventListener('click', function(e) {
+				var element = e.target;
 
-			for(n = 0; n < dir_arrows.length; n++) {
-				dir_arrows[n].addEventListener('click', function(e) {
-					var sub_list = this.nextSibling.nextSibling;
+				if(element.classList.contains('angle-down')) {
+					var sub_list = element.nextSibling.nextSibling;
 
 					var current_state = sub_list.style.display;
 					if(current_state == 'block') {
 						sub_list.style.display = 'none';
-						this.style.transform = 'rotate(0deg)';
+						element.style.transform = 'rotate(0deg)';
 					} else {
 						sub_list.style.display = 'block';
-						this.style.transform = 'rotate(90deg)';
+						element.style.transform = 'rotate(90deg)';
 					}
-				})
-			}
-
-			for(n = 0; n < dirs.length; n++) {
-				dirs[n].addEventListener('click', function(e) {
-					var value = this.dataset.val;
-					var text = this.innerHTML;
+				} else if(element.classList.contains('name')) {
+					var value = element.dataset.val;
+					var text = element.innerHTML;
 
 					document.getElementById('selected').innerHTML = text;
 					document.querySelector('input[name=dir]').value = value;
 
-					document.getElementById('dir-list').style.display = 'none';
-					document.querySelector('#directory .angle-down').style.transform = 'rotate(90deg)';
-				})
-			}
+					this.style.display = 'none';
+					angle.style.transform = 'rotate(90deg)';
+				}
+			});
 
 			document.getElementById('directory').onclick = function() {
-				var sub_list = document.getElementById('dir-list');
-				var angle = document.querySelector('#directory .angle-down');
-				var current_state = sub_list.style.display;
+				var current_state = dir_list.style.display;
 				if(current_state == 'block') {
-					sub_list.style.display = 'none';
+					dir_list.style.display = 'none';
 					angle.style.transform = 'rotate(90deg)';
 				} else {
-					sub_list.style.display = 'block';
+					dir_list.style.display = 'block';
 					angle.style.transform = 'rotate(-90deg)';
 				}
 			};

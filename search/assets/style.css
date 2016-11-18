@@ -38,7 +38,7 @@ form {
 }
 
 form a {
-	padding:4px 0 3px;
+	padding:4px 0;
 	border:1px solid #1d7fd4;
 	color:#1d7fd4;
 	display:block;
@@ -109,7 +109,7 @@ td {
 	padding:3px 5px 4px;
 	border:1px solid;
 	width:150px;
-
+	cursor:pointer;
 }
 
 #directory > .angle-down {
@@ -162,6 +162,7 @@ td {
 }
 
 input {
-	height:27px;
+	height:28px;
 	border:1px solid #000;
+	background-color:#FFF;
 }
