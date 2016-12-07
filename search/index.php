@@ -33,39 +33,10 @@ if(isset($_GET['logout'])) {
 					<div class="form-element">
 						<label>Directory</label>
 						<?php
-							function buildTree($dir) {
-								chdir($dir);
-								$dir_list = glob('*');
-								$out = array();
-
-								foreach($dir_list as $element) {
-									if(is_dir($element)) {
-										$out[$element] = buildTree($element);
-									}
-								}
-								chdir('../');
-								return $out;
-							}
-
-							function printList($dir, $parent) {
-								foreach($dir as $key => $e) {
-
-									echo '<li>';
-									if(sizeof($e)) {
-										echo '<span class="angle-down">&#10148;</span>';
-										echo '<span data-val="'. $parent .'/'. $key .'" class="name">'. $key .'</span>';
-										echo '<ul>';
-										echo printList($e, $parent .'/'. $key);
-										echo '</ul>';
-									} else {
-										echo '<span data-val="'. $parent .'/'. $key .'" class="name">'. $key .'</span>';;
-									}
-									echo '</li>';
-								}
-							}
+							require('lib/dir.php');
 							$pwd = getcwd();
 							chdir('../');
-							$dir_tree = buildTree('.');
+							$dirs = getDirs('.');
 							chdir($pwd);
 							//print_r($dir_tree);
 						?>
@@ -78,8 +49,18 @@ if(isset($_GET['logout'])) {
 							<ul>
 								<li><span class="name" data-val=".">.</span></li>
 								<?php
-								printList($dir_tree, '.');
-								?>
+								$n = 0;
+								foreach($dirs as $name => $dir) { ?>
+									<li id="dir-<?php echo $n ?>">
+									<?php if($dir['has_dir']) { ?>
+										<span class="angle-down">&#10148;</span>
+										<span class="name" data-val="<?php echo $dir['dir'] ?>"><?php echo $name ?></span>
+									<?php } else { ?>
+										<span class="name" data-val="<?php echo $dir['dir'] ?>"><?php echo $name ?></span>
+									<?php } ?>
+									</li>
+								<?php $n++;
+								} ?>
 							</ul>
 						</div>
 					</div>
@@ -109,15 +90,20 @@ if(isset($_GET['logout'])) {
 				var element = e.target;
 
 				if(element.classList.contains('angle-down')) {
-					var sub_list = element.nextSibling.nextSibling;
-
-					var current_state = sub_list.style.display;
-					if(current_state == 'block') {
-						sub_list.style.display = 'none';
-						element.style.transform = 'rotate(0deg)';
+					var parent = element.parentElement;
+					var dir = parent.querySelector('.name').dataset.val;
+					var child = document.getElementById(parent.id + '-child');
+					if(!child) {
+						renderNextLevel(element, dir);
 					} else {
-						sub_list.style.display = 'block';
-						element.style.transform = 'rotate(90deg)';
+						var current_state = child.style.display;
+						if(current_state == 'block') {
+							child.style.display = 'none';
+							element.style.transform = 'rotate(0)';
+						} else {
+							child.style.display = 'block';
+							element.style.transform = 'rotate(90deg)';
+						}
 					}
 				} else if(element.classList.contains('name')) {
 					var value = element.dataset.val;
@@ -211,6 +197,45 @@ if(isset($_GET['logout'])) {
 				} else {
 					element.style.display = 'none';
 				}
+			}
+
+			var renderNextLevel = function(element, dir) {
+				var xhr = new XMLHttpRequest();
+				xhr.open('GET', 'lib/dir.php?dir=' + encodeURIComponent(dir));
+
+				xhr.onreadystatechange = function() {
+					if (xhr.readyState==4 && xhr.status==200) {
+						var results = JSON.parse(xhr.responseText);
+						var parent = element.parentElement;
+
+						var ul = document.createElement('ul');
+
+						ul.id = parent.id + '-child';
+						var n = 0;
+						for(name in results) {
+							var li = document.createElement('li');
+							li.id = parent.id + '-' + n;
+							var name_span = document.createElement('span');
+							name_span.className = 'name';
+							name_span.dataset.val = results[name]['dir'];
+							name_span.innerHTML = name;
+							var arrow = document.createElement('span')
+							arrow.innerHTML = '&#10148;';
+							arrow.classList = 'angle-down';
+
+							li.appendChild(name_span);
+							if(results[name]['has_dir'] == 1) {
+								li.insertBefore(arrow, name_span);
+							}
+							ul.appendChild(li);
+							n++;
+						}
+						parent.appendChild(ul);
+						document.getElementById(parent.id + '-child').style.display = 'block';
+						element.style.transform = 'rotate(90deg)';
+					}
+				}
+				xhr.send();
 			}
 			</script>
 		<?php } ?>

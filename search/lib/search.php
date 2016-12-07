@@ -60,10 +60,12 @@ if ($_POST['search'] && $_POST['dir']) {
 			$files = array();
 			foreach($results as $result) {
 				$result_array = explode(':', $result);
-				$tmp[$result_array[0]][] = array(
-					'line_number' => $result_array[1],
-					'line' => htmlspecialchars($result_array[2])
-				);
+				if(isset($result_array[2])) {
+					$tmp[$result_array[0]][] = array(
+						'line_number' => $result_array[1],
+						'line' => htmlspecialchars($result_array[2])
+					);
+				}
 			}
 
 			foreach($tmp as $file => $value) {
