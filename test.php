@@ -1,10 +1,11 @@
 <?php
+ini_set('display_errors', '1');
 require 'search/lib/php_search_lib.php';
-
-$search_string = 'session';
+$search_string = '$this->session->data[';
 $dir = '.';
 
 $search  = new Search();
+$search->debug(true);
 /*if(!empty($_POST['extension']) || !empty($_POST['name'])) {
 	$filters = array(
 		'binary' => 0, //TODO
